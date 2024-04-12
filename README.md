@@ -4,4 +4,4 @@ Anggota:
 - Jonathan Purba
 - Aulia Putri Salsabila
 
-masih banyak bug, gabisa masuk ke chat screen
+bug fixed, tinggal dipercantik dan deploy
