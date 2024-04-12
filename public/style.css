@@ -17,7 +17,6 @@ body {
     background: #fff;
     border-left: 1px solid #eee;
     border-right: 1px solid #eee;
-
 }
 .app > .screen {
     display: none;
@@ -90,7 +89,7 @@ body {
     cursor: pointer;
     outline: none;
 }
-.chat-screen .message {
+.chat-screen .messages{
     width: 100%;
     height: calc(100% - 100px);
     background: #f5f5f5;

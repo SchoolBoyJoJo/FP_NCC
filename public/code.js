@@ -1,5 +1,3 @@
-const { text } = require("express");
-
 (function(){
 
     const app = document.querySelector(".app");
@@ -34,6 +32,19 @@ const { text } = require("express");
             text:message
         });
         app.querySelector(".chat-screen #message-input").value = "";
+    });
+
+    app.querySelector(".chat-screen #exit-chat").addEventListener("click", function(){
+        socket.emit("exituser", uname);
+        window.location.href = window.location.href;
+    });
+
+    socket.on("update", function(update){
+        renderMessage("update", update)
+    });
+
+    socket.on("chat", function(message){
+        renderMessage("other", message)
     });
 
     function renderMessage(type,message){
