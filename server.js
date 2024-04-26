@@ -23,21 +23,21 @@ io.on("connection", function(socket) {
 
     socket.on("exituser", function() {
         const { username, room } = users[socket.id];
-        delete users[socket.id]; 
-        socket.leave(room); 
+        delete users[socket.id]; // Hapus informasi pengguna saat mereka keluar
+        socket.leave(room); // Keluar dari ruangan yang ditentukan oleh pengguna
         io.to(room).emit("update", `${username} left the conversation`);
-
+    
+        // Jika pengguna keluar dari ruangan privat, kirim pesan-pesan mereka ke ruangan publik
         if (privateRooms.has(room)) {
-            const publicRoom = "public";
-            io.to(publicRoom).emit("update", `Messages from ${username} in private room ${room} are now in public room`);
+            // Kirim semua pesan pengguna yang terkait dengan ruangan privat ke ruangan publik
             for (const id in users) {
                 if (users[id].username === username && users[id].room === room) {
-                    io.to(publicRoom).emit("chat", { username, text: users[id].lastMessages });
+                    io.to("public").emit("chat", { username, text: users[id].lastMessages });
                 }
             }
         }
     });
-
+    
     socket.on("chat", function(data) {
         const { username, text, room } = data;
         io.to(room).emit("chat", { username, text });
