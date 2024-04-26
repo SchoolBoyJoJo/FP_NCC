@@ -4,4 +4,5 @@ Anggota:
 - Jonathan Purba
 - Aulia Putri Salsabila
 
-bug fixed, tinggal dipercantik dan deploy
+
+private message still leaking, kurang live polling, dan deploy
