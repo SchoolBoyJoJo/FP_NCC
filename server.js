@@ -3,23 +3,80 @@ const path = require("path");
 
 const app = express();
 const server = require("http").createServer(app);
-
 const io = require("socket.io")(server);
 
-app.use(express.static(path.join(__dirname+"/public")));
+app.use(express.static(path.join(__dirname, "public")));
 
-io.on("connection", function(socket){
-    socket.on("newuser", function(username){
-        socket.broadcast.emit("update", username + " joined the conversation");
+const users = {};
+const privateRooms = new Set();
+
+io.on("connection", function(socket) {
+    socket.on("newuser", function(data) {
+        const { username, room } = data;
+        socket.username = username; 
+
+        const defaultRoom = "public";
+        socket.join(defaultRoom);
+        users[socket.id] = { username, room: defaultRoom }; 
+        io.to(defaultRoom).emit("update", `${username} joined the conversation`);
     });
-    socket.on("exituser", function(username){
-        socket.broadcast.emit("update", username + " left the conversation");
+
+    socket.on("exituser", function() {
+        const { username, room } = users[socket.id];
+        delete users[socket.id]; 
+        socket.leave(room); 
+        io.to(room).emit("update", `${username} left the conversation`);
+
+        if (privateRooms.has(room)) {
+            const publicRoom = "public";
+            io.to(publicRoom).emit("update", `Messages from ${username} in private room ${room} are now in public room`);
+            for (const id in users) {
+                if (users[id].username === username && users[id].room === room) {
+                    io.to(publicRoom).emit("chat", { username, text: users[id].lastMessages });
+                }
+            }
+        }
     });
-    socket.on("chat", function(message){
-        socket.broadcast.emit("chat", message);
+
+    socket.on("chat", function(data) {
+        const { username, text, room } = data;
+        io.to(room).emit("chat", { username, text });
+
+        if (privateRooms.has(room)) {
+            if (!users[socket.id].hasOwnProperty("lastMessages")) {
+                users[socket.id].lastMessages = [];
+            }
+            users[socket.id].lastMessages.push({ username, text });
+        }
+    });
+
+    socket.on("createPrivateRoom", function(room) {
+        privateRooms.add(room);
+    });
+
+    socket.on("getPrivateRooms", function() {
+        socket.emit("privateRoomsList", Array.from(privateRooms));
+    });
+
+    socket.on("joinPrivateRoom", function(room) {
+        socket.join(room); 
+        users[socket.id].room = room;
+        io.to(room).emit("update", `${socket.username} joined ${room}`);
+    });
+
+    socket.on("exitPrivateRoom", function() {
+        const { username, room } = users[socket.id];
+        if (room !== "public") {
+            socket.leave(room); 
+            socket.join("public"); 
+            users[socket.id].room = "public"; 
+            io.to(room).emit("update", `${username} left the private room`);
+            io.to("public").emit("update", `${username} joined the public room`);
+        }
     });
 });
 
-server.listen(5000, () => {
-    console.log('Server is running on port 5000');
+const PORT = process.env.PORT || 5000;
+server.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
 });
