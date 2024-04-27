@@ -7,10 +7,10 @@
 
     app.querySelector(".join-screen #join-user").addEventListener("click", function(){
         let username = app.querySelector(".join-screen #username").value;
-        if(username.length === 0){ 
+        if(username.length === 0){
             return;
         }
-        socket.emit("newuser", { username, room: currentRoom }); 
+        socket.emit("newuser", { username, room: currentRoom });
         uname = username;
         app.querySelector(".join-screen").classList.remove("active");
         app.querySelector(".chat-screen").classList.add("active");
@@ -24,13 +24,13 @@
         socket.emit("chat", {
             username: uname,
             text: message,
-            room: currentRoom 
+            room: currentRoom
         });
         app.querySelector(".chat-screen #message-input").value = "";
     });
 
     app.querySelector(".chat-screen #exit-chat").addEventListener("click", function(){
-        socket.emit("exituser"); 
+        socket.emit("exituser");
         window.location.href = window.location.href;
     });
 
@@ -47,6 +47,7 @@
 
     app.querySelector(".chat-screen #exit-private-room").addEventListener("click", function(){
         socket.emit("exitPrivateRoom");
+        currentRoom = "public";
     });
 
     socket.on("update", function(update){
@@ -55,9 +56,11 @@
 
     socket.on("chat", function(data){
         const { username, text, room } = data;
-        const sender = (username === uname) ? "You" : username; 
-        renderMessage("other", { username: sender, text, room });
+        const sender = (username === uname) ? "You" : username;
+            renderMessage("other", { username: sender, text, room });
+        
     });
+    
 
     socket.on("privateRoomsList", function(privateRoomsList){
         const roomsList = privateRoomsList.join("\n");
@@ -65,17 +68,9 @@
         const roomToJoin = prompt("Enter the name of the room you want to join:");
         if(roomToJoin && privateRoomsList.includes(roomToJoin)) {
             socket.emit("joinPrivateRoom", roomToJoin);
+            currentRoom = roomToJoin;
         } else {
             alert("Invalid room name or room is not available.");
-        }
-    });
-
-    socket.on("chat", function(data){
-        const { username, text, room } = data;
-        const sender = (username === uname) ? "You" : username;
-
-        if (room === "public" && currentRoom !== "public") {
-            renderMessage("other", { username: sender, text, room });
         }
     });
 
