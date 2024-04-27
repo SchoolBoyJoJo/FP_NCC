@@ -4,5 +4,6 @@ Anggota:
 - Jonathan Purba
 - Aulia Putri Salsabila
 
+PUBLIC IP ADDRESS :http://20.71.116.83/
 
-public & private message done, kurang live polling, dan deploy
+semua aman tinggal polling
