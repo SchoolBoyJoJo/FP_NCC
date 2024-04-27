@@ -5,4 +5,4 @@ Anggota:
 - Aulia Putri Salsabila
 
 
-private message still leaking, kurang live polling, dan deploy
+public & private message done, kurang live polling, dan deploy
