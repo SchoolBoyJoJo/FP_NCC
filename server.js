@@ -24,7 +24,7 @@ io.on("connection", function(socket) {
         const { username, room } = users[socket.id];
         delete users[socket.id];
         socket.leave(room);
-        io.to(defaultRoom).emit("update", `${username} left the conversation`);
+        io.to(room).emit("update", `${username} left the conversation`);
     });
 
     socket.on("chat", function(data) {
